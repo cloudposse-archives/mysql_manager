@@ -29,7 +29,7 @@ module MysqlManager
       if str =~ /^\/(.*?)\/$/
         Regexp.new($1.to_s)
       else
-        Regexp.new("^#{Regexp.escape(str)}$/")
+        Regexp.new("^#{Regexp.escape(str)}$")
       end
     end
 
