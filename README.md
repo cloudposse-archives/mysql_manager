@@ -54,8 +54,18 @@ Or install it yourself as:
 
 ## Examples
 
-mysql-manager 
+Kill all queries by user "api" that have been running longer than 30 seconds:
 
+    mysql-manager --kill --kill:user api --kill:max-query-time 30 --log:level DEBUG --dry-run
+
+Recover a MySQL Slave that has failed replication and wait for it to remain healthy (fully caught up to master) for 60 seconds.
+
+    mysql-manager --skip-replication-errors --skip-replication-errors:min-healthy-duration 60 --log:level DEBUG
+
+Reload `/etc/my.cnf` without restarting MySQL:
+
+    mysql-manager --reload-my-cnf --reload-my-cnf:config /etc/my.cnf --log:level DEBUG
+    
 ## Contributing
 
 1. Fork it
