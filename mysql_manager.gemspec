@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["e@osterman.com"]
   gem.description   = %q{MySQL Manager is a utility to perform routine tasks on a MySQL database.}
   gem.summary       = %q{MySQL Manager is a utility to perform routine tasks such as restoring replication after errors, killing queries based on a set of criteria, or reloading my.cnf without restarting the database.}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/osterman/mysql_manager"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
