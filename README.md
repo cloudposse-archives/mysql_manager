@@ -4,7 +4,7 @@ MySQL Manager is a utility to perform routine tasks on a MySQL database.
 
   * Continuously execute `SET GLOBAL SQL_SLAVE_SKIP_COUNTER = 1` and `START SLAVE` statements until replication is caught up (leaves slave in inconsistent state with master) 
   * Reload `my.cnf` without restarting MySQL (limited to dynamic variables)
-  * Kill queries that match a set of criteria (execution time, user, db, state, command, host)
+  * Kill queries that match a set of criteria (execution time, user, db, state, command, host, query) using PCRE regexes or literal strings. 
 
 ## Installation
 
