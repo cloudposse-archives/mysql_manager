@@ -46,7 +46,7 @@ module MysqlManager
       options[:command] ||= []
       options[:state] ||= []
       options[:db] ||= []
-      
+
       @dbh.execute("SHOW FULL PROCESSLIST") do |sth|
         sth.fetch_hash() do |row| 
           next if row['Command'] == 'Binlog Dump'
@@ -64,15 +64,18 @@ module MysqlManager
                 end
               end
             when :user, :host, :query, :command, :state, :db
+              
+              col = field == :query ? 'Info' : field.to_s.capitalize
+
               if criteria.length > 0
                 matched = false
                 criteria.each do |pattern|
-                  if pattern.match(row[field.to_s.capitalize])
+                  if pattern.match(row[col])
                     matched = true
                     break
                   end
                 end
-                #puts "#{row[field.to_s.capitalize]} #{criteria.inspect} == #{matched}"
+                #puts "#{row[col]} #{criteria.inspect} == #{matched}"
                 results << matched
               end
             end
