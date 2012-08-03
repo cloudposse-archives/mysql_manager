@@ -210,6 +210,9 @@ module MysqlManager
         @utilities = Utilities.new(@options[:db])
         @utilities.log = @log
         @utilities.dry_run = @options[:dry_run]
+      rescue DBI::DatabaseError => e
+        @log.fatal(e.message)
+        exit(1) 
       rescue MissingArgumentException => e
         puts e.message
         puts @optparse
@@ -232,12 +235,18 @@ module MysqlManager
             @log.debug("about to call reload_my_cnf")
             @utilities.reload_my_cnf(options)
           end
+        rescue DBI::DatabaseError => e
+          @log.fatal(e.message)
+          exit(1)
         rescue FileNotFoundException => e
           @log.fatal(e.message)
-        rescue Interupt
+          exit(1)
+        rescue Interrupt
           @log.info("Exiting")
+          exit
         rescue Exception => e
           @log.fatal(e.message + e.backtrace.join("\n"))
+          exit(1)
         end
       end
     end
