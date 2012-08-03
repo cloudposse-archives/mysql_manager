@@ -147,7 +147,7 @@ module MysqlManager
 
           @options[:db][:username] = 'root'
           opts.on( '--db:username USERNAME', "Username corresponding to DSN (default: #{@options[:db][:username]})" ) do|username|
-            @options[:username] = username
+            @options[:db][:username] = username
           end
 
           @options[:db][:password] = ""
