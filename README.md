@@ -52,11 +52,23 @@ Or install it yourself as:
         -V, --version                    Display version information
         -h, --help                       Display this screen
 
+## How matching is done
+
+If you specify a simple string as a parameter (e.g. `--kill:user api`), this is interpreted as an exactly matching
+regular expression (e.g. `/^api$/`).
+
+To specify your own regexp, include a leading and trailing slash. To match all usernames that *start* with `api`:
+`--kill:user "/^api/"`
+
 ## Examples
 
 Kill all queries by user "api" that have been running longer than 30 seconds:
 
     mysql-manager --kill --kill:user api --kill:max-query-time 30 --log:level DEBUG --dry-run
+
+Kill only SELECT queries by users starting with "api" from a host containing "test" that have been running longer than 30 seconds:
+
+    mysql-manager --kill --kill:user "/^api/" --kill:query "/^SELECT/" --kill:host "/test/" --kill:max-query-time 30 --dry-run
 
 Recover a MySQL Slave that has failed replication and wait for it to remain healthy (fully caught up to master) for 60 seconds.
 
