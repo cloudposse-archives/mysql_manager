@@ -81,7 +81,7 @@ module MysqlManager
 
           @options[:kill][:state] = []
           opts.on( '--kill:state STATE', 'Kill queries matching STATE (repeatable)') do |state|
-            @options[:kill][:state] << to_patterns(state) 
+            @options[:kill][:state] << to_pattern(state) 
           end
 
           @options[:kill][:db] = []
