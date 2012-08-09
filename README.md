@@ -77,6 +77,10 @@ Recover a MySQL Slave that has failed replication and wait for it to remain heal
 Reload `/etc/my.cnf` without restarting MySQL:
 
     mysql-manager --reload-my-cnf --reload-my-cnf:config /etc/my.cnf --log:level DEBUG
+
+## Contributors
+
+https://github.com/osterman/mysql_manager/graphs/contributors
     
 ## Contributing
 
