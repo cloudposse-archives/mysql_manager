@@ -18,5 +18,5 @@
 # along with MySQL Manager.  If not, see <http://www.gnu.org/licenses/>.
 #
 module MysqlManager
-  VERSION = "1.0.2"
+  VERSION = "1.0.3"
 end
