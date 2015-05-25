@@ -22,7 +22,7 @@ Or install it yourself as:
 
 ## Usage
 
-    Usage: mysql-manager options
+    Usage: bin/mysql-manager options
             --kill                       Kill queries based on specified criteria
             --kill:max-query-time TIME   Kill queries that have been running for more than TIME
             --kill:user USER             Kill queries matching USER (repeatable)
@@ -48,9 +48,16 @@ Or install it yourself as:
             --log:file FILE              Write logs to FILE (default: STDERR)
             --log:age DAYS               Rotate logs after DAYS pass (default: 7)
             --log:size SIZE              Rotate logs after the grow past SIZE bytes
+            --hotcopy                    Perform a hotcopy
+            --hotcopy:data-dir PATH      Rsync mysql data dir from PATH (default: /var/lib/mysql)
+            --hotcopy:backup-dir PATH    Rsync to PATH (default: /tmp/mysql)
+            --hotcopy:rsync-args ARGS    Arguments to pass to rsync (default: -av)
+            --hotcopy:rsync-bin bin      Rsync executable path (default: rsync)
+            --hotcopy:rsync-ttl ttl      Acceptable rsync execution time before performing table locks (default: 60)
             --dry-run                    Do not run statements which affect the state of the database when executed
         -V, --version                    Display version information
         -h, --help                       Display this screen
+
 
 ## How matching is done
 
@@ -77,6 +84,16 @@ Recover a MySQL Slave that has failed replication and wait for it to remain heal
 Reload `/etc/my.cnf` without restarting MySQL:
 
     mysql-manager --reload-my-cnf --reload-my-cnf:config /etc/my.cnf --log:level DEBUG
+
+Perform a hotcopy backup of the running mysql database using rsync to a remote server. It will repeated rsync the folder without locks until syncs take less than 30 seconds.
+
+    mysql-manager --hotcopy \
+                  --hotcopy:data-dir /var/lib/mysql/ \
+                  --hotcopy:backup-dir user@remote.host.com:/tmp/mysql/ \
+                  --hotcopy:rsync-args "-av --exclude=*.err" \
+                  --hotcopy:rsync-ttl 30 \
+                  --db:user root \
+                  --db:pass $MYSQL_ROOT_PASSWORD
 
 ## Contributors
 
