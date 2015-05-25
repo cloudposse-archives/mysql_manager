@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = MysqlManager::VERSION
   gem.add_runtime_dependency "parseconfig", ">= 1.0.2"
+  gem.add_runtime_dependency "mysql2", ">= 0.3.18"
   gem.add_runtime_dependency "dbi", ">= 0.4.5"
   gem.add_runtime_dependency "dbd-mysql", ">= 0.4.4"
 end

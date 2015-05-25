@@ -20,6 +20,8 @@
 require 'dbi'
 require 'logger'
 require 'parseconfig'
+require 'shellwords'
+require 'open3'
 
 module MysqlManager
   class FileNotFoundException < Exception; end
@@ -214,5 +216,72 @@ module MysqlManager
         @log.error("Error code: #{e.err}: #{e.errstr}")
       end
     end
+
+    def run(cmd)
+      stdout, stderr, status = Open3.capture3(Shellwords.join(cmd))
+      if status != 0
+        puts stderr
+        raise Exception.new("execution of command failed")
+      end
+      return status
+    end
+
+    def hotcopy(options = {})
+      begin
+        t_start = Time.now.to_f
+        # ensure mysql directory exists
+        unless File.directory?(options[:data_dir])
+          raise FileNotFoundException.new("Unable to open mysql data dir #{options[:data_dir]}")
+        end
+
+        rsync = []
+        rsync << options[:rsync_bin]
+        rsync << options[:rsync_args]
+        rsync << options[:data_dir] + '/'
+        rsync << options[:backup_dir] + '/'
+
+        # create target directory if it does not already exist
+        unless File.directory?(options[:backup_dir])
+          @log.info("Creating #{options[:backup_dir]}")
+          run ['mkdir', '-p', options[:backup_dir]]
+        end
+
+        rsync.flatten!
+
+        t_rsync = Time.now.to_f
+        t_rsync_elapsed = Time.now.to_f
+        while t_rsync_elapsed > options[:rsync_ttl]
+          # first do a raw rsync without table locks
+          @log.info("Performing first-pass rsync without table locks")
+          run rsync
+          t_rsync_elapsed = Time.now.to_f - t_rsync
+          @log.info("Rsync took #{t_rsync_elapsed} seconds")
+          sleep 1
+          t_rsync = Time.now.to_f
+        end
+
+        # then flush tables with read lock
+        @log.info("Locking tables")
+        t_lock = Time.now.to_f
+        @dbh.do("FLUSH TABLES WITH READ LOCK")  unless @dry_run
+
+        # re-sync the delats
+        @log.info("Performing second-pass rsync with table locks")
+        run rsync
+      
+        # release locks
+        @log.info("Unlocking tables")
+        @dbh.do('UNLOCK TABLES')
+        @log.info("Total lock time #{Time.now.to_f - t_lock} seconds")
+        @log.info("Total elapsed time #{Time.now.to_f - t_start} seconds")
+
+      rescue DBI::DatabaseError => e
+        @log.debug(@dbh.last_statement)
+        @log.warn(e.message)
+      end
+    end
+
+ 
+
   end
 end

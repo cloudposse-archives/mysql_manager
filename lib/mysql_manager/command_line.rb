@@ -40,6 +40,7 @@ module MysqlManager
       @options[:kill] = {}
       @options[:reload_my_cnf] = {}
       @options[:skip_replication_errors] = {}
+      @options[:hotcopy] = {}
 
       begin
         @optparse = OptionParser.new do |opts|
@@ -178,6 +179,40 @@ module MysqlManager
             @options[:log][:size] = size.to_i
           end
 
+          #
+          # Hotcopy
+          #
+
+          @options[:hotcopy][:execute] = false
+          opts.on( '--hotcopy', 'Perform a hotcopy') do
+            @options[:hotcopy][:execute] = true
+          end
+
+          @options[:hotcopy][:data_dir] = '/var/lib/mysql'
+          opts.on( '--hotcopy:data-dir PATH', "Rsync mysql data dir from PATH (default: #{@options[:hotcopy][:data_dir]})") do |path|
+            @options[:hotcopy][:data_dir] = path.to_s
+          end
+
+          @options[:hotcopy][:backup_dir] = '/tmp/mysql'
+          opts.on( '--hotcopy:backup-dir PATH', "Rsync to PATH (default: #{@options[:hotcopy][:backup_dir]})") do |path|
+            @options[:hotcopy][:backup_dir] = path.to_s
+          end
+
+          @options[:hotcopy][:rsync_args] = '-av'
+          opts.on( '--hotcopy:rsync-args ARGS', "Arguments to pass to rsync (default: #{@options[:hotcopy][:rsync_args]})") do |args|
+            @options[:hotcopy][:rsync_args] = Shellwords.split(args.to_s)
+          end
+
+          @options[:hotcopy][:rsync_bin] = 'rsync'
+          opts.on( '--hotcopy:rsync-bin bin', "Rsync executable path (default: #{@options[:hotcopy][:rsync_bin]})") do |bin|
+            @options[:hotcopy][:rsync_bin] = bin.to_s
+          end
+
+          @options[:hotcopy][:rsync_ttl] = 60
+          opts.on( '--hotcopy:rsync-ttl ttl', "Acceptable rsync execution time before performing table locks (default: #{@options[:hotcopy][:rsync_ttl]})") do |ttl|
+            @options[:hotcopy][:rsync_ttl] = ttl.to_i
+          end
+
           # 
           # General options
           #
@@ -234,6 +269,9 @@ module MysqlManager
           when :reload_my_cnf
             @log.debug("about to call reload_my_cnf")
             @utilities.reload_my_cnf(options)
+          when :hotcopy
+            @log.debug("about to call hotcopy")
+            @utilities.hotcopy(options)
           end
         rescue DBI::DatabaseError => e
           @log.fatal(e.message)
