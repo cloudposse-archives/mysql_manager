@@ -283,7 +283,8 @@ module MysqlManager
           @log.info("Exiting")
           exit
         rescue Exception => e
-          @log.fatal(e.message + e.backtrace.join("\n"))
+          #@log.fatal(e.message + "\n" + e.backtrace.join("\n"))
+          @log.fatal(e.message)
           exit(1)
         end
       end

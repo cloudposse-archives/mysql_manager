@@ -234,6 +234,10 @@ module MysqlManager
           raise FileNotFoundException.new("Unable to open mysql data dir #{options[:data_dir]}")
         end
 
+        # test connection
+        @log.info("Testing connection...")
+        @dbh.do("SELECT 1") unless @dry_run
+
         rsync = []
         rsync << options[:rsync_bin]
         rsync << options[:rsync_args]
@@ -243,7 +247,7 @@ module MysqlManager
         # create target directory if it does not already exist
         unless File.directory?(options[:backup_dir])
           @log.info("Creating #{options[:backup_dir]}")
-          run ['mkdir', '-p', options[:backup_dir]]
+          run ['mkdir', '-p', options[:backup_dir]] unless @dry_run
         end
 
         rsync.flatten!
@@ -253,7 +257,7 @@ module MysqlManager
         while t_rsync_elapsed > options[:rsync_ttl]
           # first do a raw rsync without table locks
           @log.info("Performing first-pass rsync without table locks")
-          run rsync
+          run rsync unless @dry_run
           t_rsync_elapsed = Time.now.to_f - t_rsync
           @log.info("Rsync took #{t_rsync_elapsed} seconds")
           sleep 1
@@ -267,17 +271,18 @@ module MysqlManager
 
         # re-sync the delats
         @log.info("Performing second-pass rsync with table locks")
-        run rsync
+        run rsync unless @dry_run
       
         # release locks
         @log.info("Unlocking tables")
-        @dbh.do('UNLOCK TABLES')
+        @dbh.do('UNLOCK TABLES') unless @dry_run
         @log.info("Total lock time #{Time.now.to_f - t_lock} seconds")
         @log.info("Total elapsed time #{Time.now.to_f - t_start} seconds")
 
       rescue DBI::DatabaseError => e
         @log.debug(@dbh.last_statement)
         @log.warn(e.message)
+        exit(1)
       end
     end
 
