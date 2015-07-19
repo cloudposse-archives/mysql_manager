@@ -244,10 +244,12 @@ module MysqlManager
         rsync << options[:data_dir] + '/'
         rsync << options[:backup_dir] + '/'
 
-        # create target directory if it does not already exist
-        unless File.directory?(options[:backup_dir])
-          @log.info("Creating #{options[:backup_dir]}")
-          run ['mkdir', '-p', options[:backup_dir]] unless @dry_run
+        # create target directory if it does not already exist (unless ofcourse we're syncing to a remote target denoted by rsync:// or an rsync module denoted by ::)
+        if options[:backup_dir] !~ /^rsync:\/\// && options[:backup_dir] !~ /::/
+          unless File.directory?(options[:backup_dir])
+            @log.info("Creating #{options[:backup_dir]}")
+            run ['mkdir', '-p', options[:backup_dir]] unless @dry_run
+          end
         end
 
         rsync.flatten!
